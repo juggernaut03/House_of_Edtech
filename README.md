@@ -74,3 +74,30 @@ To reset the project to a clean state (moving current app code to app-example):
 ```bash
 npm run reset-project
 ```
+
+## Testing
+
+A comprehensive testing suite has been implemented using Jest and React Native Testing Library.
+
+### Running Tests
+
+To run the tests, use the following commands:
+
+-   Run all tests: `npm test`
+-   Run tests in watch mode: `npm run test:watch`
+
+### Test Coverage
+
+The following components and screens are covered by tests:
+
+-   **Unit Tests:**
+    -   `ThemedText`
+    -   `ThemedView`
+    -   `HelloWave`
+    -   `ParallaxScrollView`
+-   **Integration Tests:**
+    -   `HomeScreen` (Navigation and rendering)
+    -   `VideoPlayerScreen` (Video player mocking and rendering)
+    -   `WebViewScreen` (WebView rendering and notifications mocking)
+
+Tests are located in `__tests__` directories alongside their respective components or in `app/__tests__`.
