@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correctly 1`] = `
+<Text
+  collapsable={false}
+  jestAnimatedProps={
+    {
+      "value": {},
+    }
+  }
+  jestAnimatedStyle={
+    {
+      "value": {},
+    }
+  }
+  jestInlineStyle={
+    {
+      "animationDuration": "300ms",
+      "animationIterationCount": 4,
+      "animationName": {
+        "50%": {
+          "transform": [
+            {
+              "rotate": "25deg",
+            },
+          ],
+        },
+      },
+      "fontSize": 28,
+      "lineHeight": 32,
+      "marginTop": -6,
+    }
+  }
+  nativeID="0"
+  style={
+    [
+      {
+        "fontSize": 28,
+        "lineHeight": 32,
+        "marginTop": -6,
+      },
+    ]
+  }
+>
+  👋
+</Text>
+`;

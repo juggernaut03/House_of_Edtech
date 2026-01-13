@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correctly 1`] = `
+<RCTScrollView
+  collapsable={false}
+  forwardedRef={[Function]}
+  jestAnimatedProps={
+    {
+      "value": {},
+    }
+  }
+  jestAnimatedStyle={
+    {
+      "value": {},
+    }
+  }
+  jestInlineStyle={
+    {
+      "backgroundColor": "#ffffff",
+      "flex": 1,
+    }
+  }
+  nativeID="0"
+  scrollEventThrottle={16}
+  style={
+    [
+      {
+        "backgroundColor": "#ffffff",
+        "flex": 1,
+      },
+    ]
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      jestAnimatedProps={
+        {
+          "value": {},
+        }
+      }
+      jestAnimatedStyle={
+        {
+          "value": {
+            "transform": [
+              {
+                "translateY": 0,
+              },
+              {
+                "scale": 1,
+              },
+            ],
+          },
+        }
+      }
+      jestInlineStyle={
+        [
+          {
+            "height": 250,
+            "overflow": "hidden",
+          },
+          {
+            "backgroundColor": "#fff",
+          },
+        ]
+      }
+      nativeID="1"
+      style={
+        [
+          {
+            "height": 250,
+            "overflow": "hidden",
+          },
+          {
+            "backgroundColor": "#fff",
+          },
+          {
+            "transform": [
+              {
+                "translateY": 0,
+              },
+              {
+                "scale": 1,
+              },
+            ],
+          },
+        ]
+      }
+    >
+      <View
+        testID="mock-header"
+      />
+    </View>
+    <View
+      style={
+        [
+          {
+            "backgroundColor": "#ffffff",
+          },
+          {
+            "flex": 1,
+            "gap": 16,
+            "overflow": "hidden",
+            "padding": 32,
+          },
+        ]
+      }
+    >
+      <Text>
+        Content
+      </Text>
+    </View>
+  </View>
+</RCTScrollView>
+`;
