@@ -1,41 +1,31 @@
-import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
+  BACKGROUND_GRAY,
+  BACKGROUND_LIGHT,
+  BACKGROUND_WHITE,
+  BORDER_LIGHT,
+  BUTTON_DESC_MUTED,
+  PRIMARY,
+  TEXT_PRIMARY,
+  TEXT_TERTIARY,
+  TEXT_WHITE
+} from '@/constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
   ActivityIndicator,
   Alert,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
-import * as Notifications from 'expo-notifications';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import {
-  PRIMARY,
-  SUCCESS,
-  WARNING,
-  BACKGROUND_LIGHT,
-  BACKGROUND_WHITE,
-  BACKGROUND_GRAY,
-  BORDER_LIGHT,
-  TEXT_PRIMARY,
-  TEXT_TERTIARY,
-  TEXT_WHITE,
-  BUTTON_DESC_MUTED,
-} from '@/constants/Colors';
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+
 
 export default function WebViewScreen() {
   const router = useRouter();
@@ -46,35 +36,74 @@ export default function WebViewScreen() {
 
   // Request notification permissions and set up notification listener
   useEffect(() => {
-    const requestPermissions = async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Notification permissions are required to use this feature.'
-        );
+    // Configure notification handler
+    try {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowBanner: true,
+          shouldShowList: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to set notification handler:', error);
+    }
+
+    const setupNotifications = async () => {
+      try {
+        // Set up Android notification channel (required for Android 8.0+)
+        if (Platform.OS === 'android') {
+          await Notifications.setNotificationChannelAsync('default', {
+            name: 'Default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+            sound: 'default',
+          });
+        }
+
+        // Request permissions
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission Denied',
+            'Notification permissions are required to use this feature.'
+          );
+        }
+      } catch (error) {
+        console.error('Failed to setup notifications:', error);
       }
     };
 
-    requestPermissions();
+    setupNotifications();
 
     // Listen for notification responses (when user taps notification)
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data;
+    let subscription: any;
+    try {
+      subscription = Notifications.addNotificationResponseReceivedListener(
+        (response) => {
+          const data = response.notification.request.content.data;
 
-        // Deep link to video player if notification indicates it
-        if (data.navigateTo === 'video-player') {
-          router.push('/video-player');
+          // Deep link to video player if notification indicates it
+          if (data.navigateTo === 'video-player') {
+            router.push('/video-player');
+          }
         }
-      }
-    );
+      );
+    } catch (error) {
+      console.error('Failed to add notification listener:', error);
+    }
 
-    return () => subscription.remove();
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
   }, [router]);
 
   // Enhanced notification with optional navigation data
-  // Uses setTimeout for reliable delay triggering
+  // Uses trigger with seconds for reliable delay
   const triggerNotification = async (
     title: string,
     body: string,
@@ -84,35 +113,37 @@ export default function WebViewScreen() {
     try {
       setLoading(true);
 
+      // Calculate delay in seconds
+      const delayInSeconds = Math.max(1, Math.floor(delay / 1000));
+
+      // Schedule notification with seconds-based trigger
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          sound: 'default',
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+          ...(Platform.OS === 'android' && { channelId: 'default' }),
+          data: {
+            navigateTo: navigateTo || undefined,
+          },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: delayInSeconds,
+        },
+      });
+
       // Show confirmation alert
       Alert.alert(
         'Success',
-        `Notification "${title}" will appear in ${delay / 1000} seconds...`
+        `Notification "${title}" will appear in ${delayInSeconds} seconds...`
       );
-
-      // Use setTimeout to delay the notification
-      setTimeout(async () => {
-        try {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title,
-              body,
-              sound: true,
-              badge: 1,
-              data: {
-                navigateTo: navigateTo || undefined,
-              },
-            },
-            trigger: null, // Trigger immediately after delay
-          });
-        } catch (error) {
-          console.error('Notification error:', error);
-        }
-      }, delay);
 
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      console.error('Notification scheduling error:', error);
       Alert.alert(
         'Error',
         'Failed to schedule notification: ' + (error as Error).message
@@ -134,8 +165,10 @@ export default function WebViewScreen() {
           await Notifications.scheduleNotificationAsync({
             content: {
               title: 'Web Content Loaded',
-              body: 'Wikipedia page loaded successfully!',
-              sound: true,
+              body: 'House of EdTech page loaded successfully!',
+              sound: 'default',
+              priority: Notifications.AndroidNotificationPriority.HIGH,
+              ...(Platform.OS === 'android' && { channelId: 'default' }),
               data: {},
             },
             trigger: null, // Trigger immediately after delay
@@ -195,18 +228,8 @@ export default function WebViewScreen() {
               setWebviewLoading(false);
             }}
             startInLoadingState={true}
-            scalesPageToFit={true}
-            bounces={true}
-            scrollEnabled={true}
-            useWebKit={true}
-            allowsBackForwardNavigationGestures={true}
-            decelerationRate="normal"
             javaScriptEnabled={true}
-            javaScriptCanOpenWindowsAutomatically={true}
             domStorageEnabled={true}
-            cacheEnabled={true}
-            cacheMode="LOAD_DEFAULT"
-            mixedContentMode="always"
             renderLoading={() => (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={PRIMARY} />
